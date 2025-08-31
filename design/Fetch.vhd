@@ -45,7 +45,7 @@ next_pc <= std_logic_vector(unsigned(pc_out) + unsigned(binary4in32));
 
 
 
---MUX jump
+--MUX jump:
 pc_in <= JALR_values when OPCODE = op_JALR and funct3 = fu_JALR else
          JAL_values when OPCODE = op_JAL else
          condjmp_values when OPCODE = op_BRANCH else
@@ -67,7 +67,7 @@ end process;
 pipeline_fetch_decode_reg: process(CLK, RESET)
 begin
 if(RESET = '0') then
-    pc_out <= (others => '0');
+    pipeline_fetch_decode <= (others => '0');
     elsif(rising_edge(CLK)) then
         pipeline_fetch_decode <= pipeline_fetch_register_in;
 end if;
