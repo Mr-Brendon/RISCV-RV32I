@@ -1,3 +1,5 @@
+
+    
 ----------------------------------------------------------------------------------
 -- Quale miglior modo di fare il decode se non iniziarlo.
 --voglio in primis fare la CU, quindi iniziamo con tutti gli opcode ecc...
@@ -7,7 +9,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.Instruments_pkg.ALL;
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;--
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
@@ -18,8 +20,14 @@ end Decode;
 
 architecture Decode_bh of Decode is
 
+----------------------------------
+signal CLK, RESET, reg_write: std_logic; --da mettere poi nelle port
+type reg_array is array(0 to 31) of std_logic_vector(31 downto 0);
+signal file_reg_array: reg_array := (others => (others => '0'));
+signal dec_out, reg_value_rd, rs1_value, rs2_value: std_logic_vector(31 downto 0);
+----------------------------------
 signal OPCODE: std_logic_vector(pip_f_d-1 downto 0);
-signal rs1_index, rs2_index, rd_index: std_logic_vector(5 downto 0);
+signal rs1_index, rs2_index, rd_index: std_logic_vector(5 downto 0);--sicuro sia 5 e non 4??? COSA IMPORTANTE
 signal funct3: std_logic_vector(2 downto 0);
 signal funct7: std_logic_vector(6 downto 0);
 signal imm_value: std_logic_vector(19 downto 0);
@@ -33,6 +41,7 @@ rs2_index <= pipeline_fetch_decode(24 downto 20);
 rd_index <= pipeline_fetch_decode(11 downto 7);
 funct3 <= pipeline_fetch_decode(14 downto 12);
 funct7 <= pipeline_fetch_decode(31 downto 25);
+
 --imm_value: è particolare perchè dipende da istruzione
 --facciamo la gestione dell'imm in base all'opcode:
 imm_value_options: process(OPCODE, pipeline_fetch_decode)
@@ -83,7 +92,55 @@ begin
         
     end case;
 end process;
---FINE PARSER.
+--END PARSER.
+
+
+--FILE_REGISTER: (facciamo che lo faccio il file_reg per git hub, poi lo faccio magari compresso e fatto bene poi...)
+--Input: RESET, CLK, reg_write, rd_index, RS1_index, RS2_index, reg_value_rd
+--output: rs1_value, rs2_value
+
+
+
+--1) FILE_REG_DECODER:
+
+--NOTA: ho creato il segnale:
+-- type reg_array is array(0 to 31) of std_logic_vector(31 downto 0);
+-- signal file_reg_array: reg_array := (others => (others => '0'));
+--ed altri tra le lineette
+
+
+--registri + decoder (una and per azionare i registri)
+process(RESET, CLK)
+
+variable index: integer;
+begin
+    if(RESET = '0') then
+        file_reg_array <= (others => (others => '0'));
+    elsif(rising_edge(CLK)) then
+        if(reg_write = '1') then
+            index := to_integer(unsigned(rd_index));
+            if(index >= 0 and index < 32) then
+                file_reg_array(index) <= reg_value_rd;
+            end if;
+        end if;
+    end if;
+end process;
+
+
+process(rs1_index, file_reg_array)
+begin
+    rs1_value <= file_reg_array(to_integer(unsigned(rs1_index)));
+end process;
+
+process(rs2_index, file_reg_array)
+begin
+    rs2_value <= file_reg_array(to_integer(unsigned(rs2_index)));
+end process;
+
+
+--END FILE_REGISTER.
+
+
 
 
 --CU
