@@ -95,7 +95,7 @@ end process;
 --END PARSER.
 
 
---FILE_REGISTER: (facciamo che lo faccio il file_reg per git hub, poi lo faccio magari compresso e fatto bene poi...)
+--FILE_REGISTER: 
 --Input: RESET, CLK, reg_write, rd_index, RS1_index, RS2_index, reg_value_rd
 --output: rs1_value, rs2_value
 
