@@ -101,8 +101,6 @@ end process;
 
 
 
---1) FILE_REG_DECODER:
-
 --NOTA: ho creato il segnale:
 -- type reg_array is array(0 to 31) of std_logic_vector(31 downto 0);
 -- signal file_reg_array: reg_array := (others => (others => '0'));
